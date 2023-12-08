@@ -1,2 +1,1 @@
-colorama==0.4.6
-PyGObject==3.46.0
+requests~=2.31.0
