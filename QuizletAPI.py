@@ -48,7 +48,7 @@ class QuizletAPI:
 
     @staticmethod
     async def GetDataOnPageByID(id: int, engine: engine_chromium | engine_firefox | engine_webkit, page: int = 1,
-                                perpage: int = 500, token: str = "", keepSession: bool = False, ) -> dict:
+                                perpage: int = 500, token: str = "", ) -> dict:
         """
         Get data on a page (id is needed)
         :param id: int:
