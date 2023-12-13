@@ -32,6 +32,8 @@ class QuizletAPI:
         :return Raw json data in python format:
         """
         data = await QuizletAPI.GetDataOnPageByID(id, engine)
+        if "responses" not in data:
+            raise ValueError("Quizlet ID is invalid")
         token = data["responses"][0]["paging"]["token"]
         fullResponse = data
         returnedLength = len(data["responses"][0]["models"]["studiableItem"])
@@ -67,9 +69,9 @@ class QuizletAPI:
 
             browser = await engine.launch()
             webpage = await browser.new_page()
-            re_url = QuizletAPI.__urlTemplate.replace("REPLACEHERE", str(id)).replace("PERPAGEHERE",
-                                                                                      str(perpage)).replace("PAGEHERE",
-                                                                                                            str(page))
+            re_url = QuizletAPI.__urlTemplate.replace("REPLACEHERE", str(id)
+                                                      ).replace("PERPAGEHERE", str(perpage)
+                                                                ).replace("PAGEHERE", str(page))
 
             if type(id) is not int:
                 raise TypeError("Quizlet ID should be integer")
@@ -103,9 +105,6 @@ class QuizletAPI:
     def GetCard(self, index: int = 0):
         return Card(self.GetCardRaw(index))
 
-    def GetQuizletID(self) -> int:
-        return self.data["responses"][0]["models"]["studiableItem"][0]["studiableContainerId"]
-
     def GetCreatorID(self) -> int:
         return self.data["responses"][0]["models"]["studiableItem"][0]["creatorId"]
 
@@ -134,6 +133,9 @@ class Card:
             case _:
                 raise ValueError("side must be 1 or 2")
 
+    def GetTexts(self) -> list[str]:
+        return [self.GetText(1), self.GetText(2)]
+
     def GetLanguage(self, side: int) -> str:
         match side:
             case 1:
@@ -142,6 +144,9 @@ class Card:
                 return self.side2[0]["languageCode"]
             case _:
                 raise ValueError("side must be 1 or 2")
+
+    def GetLanguages(self) -> list[str]:
+        return [self.GetLanguage(1), self.GetLanguage(2)]
 
     def GetUrlTextToSpeech(self, side: int, speed: int | float | str = "Normal") -> str:
         if speed == "Normal":
@@ -183,15 +188,18 @@ class Card:
                 # tts = self.side1["ttsurl"][:speedIndex]
                 # 2nd return
                 try:
-                    return "https://quizlet.com" + self.side1[0]["ttsurl"][
-                                                   :self.side1[0]["ttsurl"].rfind("&speed")] + "&speed=" + str(speed)
+                    return "https://quizlet.com" + self.side1[0]["ttsUrl"][
+                                                   :self.side1[0]["ttsUrl"].rfind("&speed")] + "&speed=" + str(speed)
                 except TypeError:
                     return None
             case 2:
                 try:
-                    return "https://quizlet.com" + self.side2[0]["ttsurl"][
-                                                   :self.side2[0]["ttsurl"].rfind("&speed")] + "&speed=" + str(speed)
+                    return "https://quizlet.com" + self.side2[0]["ttsUrl"][
+                                                   :self.side2[0]["ttsUrl"].rfind("&speed")] + "&speed=" + str(speed)
                 except TypeError:
                     return None
             case _:
                 raise ValueError("side must be 1 or 2")
+
+    def GetUrlTextToSpeechs(self, speed: int | float | str = "Normal") -> list[str]:
+        return [self.GetUrlTextToSpeech(1, speed), self.GetUrlTextToSpeech(2, speed)]
